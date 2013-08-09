@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HasK.Data.Storage", "HasK.Data.Storage\HasK.Data.Storage.csproj", "{C23A722E-C6E2-4576-A4B2-AE4C779E37E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestStorage", "TestStorage\TestStorage.csproj", "{C5EE982B-196D-4877-A841-59B078E211A5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C23A722E-C6E2-4576-A4B2-AE4C779E37E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C23A722E-C6E2-4576-A4B2-AE4C779E37E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C23A722E-C6E2-4576-A4B2-AE4C779E37E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C23A722E-C6E2-4576-A4B2-AE4C779E37E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5EE982B-196D-4877-A841-59B078E211A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5EE982B-196D-4877-A841-59B078E211A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5EE982B-196D-4877-A841-59B078E211A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5EE982B-196D-4877-A841-59B078E211A5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = TestStorage\TestStorage.csproj
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

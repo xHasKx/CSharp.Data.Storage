@@ -1,0 +1,33 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="HasK.Data.Storage/Storage.cs">
+    <Files>
+      <File FileName="HasK.Data.Storage/Storage.cs" Line="168" Column="5" />
+      <File FileName="HasK.Data.Storage/StorageItem.cs" Line="72" Column="17" />
+      <File FileName="TestStorage/Form1.cs" Line="39" Column="1" />
+      <File FileName="TestStorage/Program.cs" Line="18" Column="1" />
+      <File FileName="TestStorage/Form1.Designer.cs" Line="15" Column="10" />
+    </Files>
+    <Pads>
+      <Pad Id="ProjectPad">
+        <State expanded="True">
+          <Node name="HasK.Data.Storage" expanded="True">
+            <Node name="Storage.cs" selected="True" />
+          </Node>
+          <Node name="TestStorage" expanded="True">
+            <Node name="Form1.cs" expanded="True" />
+          </Node>
+        </State>
+      </Pad>
+      <Pad Id="ClassPad">
+        <State expanded="True" selected="True" />
+      </Pad>
+    </Pads>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="/windata/Programming/GitHub/CSharp.Data.Storage/HasK.Data.Storage/HasK.Data.Storage/Storage.cs" line="164" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
