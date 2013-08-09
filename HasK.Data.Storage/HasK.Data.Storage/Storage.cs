@@ -81,7 +81,7 @@ namespace HasK.Data.Storage
         }
 
         /// <summary>
-        /// Get all items enumerator in storage
+        /// Get all items in storage
         /// </summary>
         public IEnumerable<StorageItem> GetItems()
         {
@@ -95,9 +95,13 @@ namespace HasK.Data.Storage
         /// <param name="type">Type name of items to enumerate</param>
         public IEnumerable<StorageItem> GetItems(string type)
         {
+            if (_items_by_type.ContainsKey(type))
+                foreach (var item in _items_by_type[type].Values)
+                    yield return item;
+            /*
             foreach (var item in _items_by_id.Values)
                 if (item.TypeName == type)
-                    yield return item;
+                    yield return item; */
         }
 
         /// <summary>
@@ -144,6 +148,12 @@ namespace HasK.Data.Storage
             return type_map[name];
         }
 
+        /// <summary>
+        /// Determine if name can be changed (will not cause name conflicts in its type) and change it in storage
+        /// </summary>
+        /// <param name="item">Item to change name</param>
+        /// <param name="new_name">New name of item</param>
+        /// <returns>Returns true if name can be changed and change it in storage internal map</returns>
         internal bool TryChangeItemName(StorageItem item, string new_name)
         {
             var type_map = _items_by_type[item.TypeName];
@@ -166,6 +176,12 @@ namespace HasK.Data.Storage
             return null;
         }
 
+        /// <summary>
+        /// Write XML attribute value - as is or in base64
+        /// </summary>
+        /// <param name="xml">XML writer ready for attribute</param>
+        /// <param name="name">Name of attribute</param>
+        /// <param name="value">Value of attribute</param>
         private void WriteXmlAttr(XmlWriter xml, string name, string value)
         {
             var has_illegal_chars = false;
@@ -234,8 +250,6 @@ namespace HasK.Data.Storage
                 throw new StorageException(this, "Storage node hasn't ItemsCount attribute in input stream");
             if (!ulong.TryParse(xml.GetAttribute("ItemsCount"), out _items_count))
                 throw new StorageException(this, "Storage node has wrong ItemsCount attribute in input stream");
-
-            Console.WriteLine("_items_count: " + _items_count);
 
             // now read items
             var type_fields = new Dictionary<string, FieldInfo[]>();
@@ -428,11 +442,23 @@ namespace HasK.Data.Storage
                 }
                 xml.WriteEndElement();
                 xml.WriteRaw("\n");
-                xml.Flush();
             }
             xml.WriteEndElement();
-
+            xml.Flush();
             xml.Close();
+        }
+
+        /// <summary>
+        /// Delete item from storage
+        /// </summary>
+        /// <param name="item">Item to delete</param>
+        public void DeleteItem(StorageItem item)
+        {
+            if (item.Storage == this)
+            {
+                _items_by_type[item.TypeName].Remove(item.Name);
+                _items_by_id.Remove(item.ID);
+            }
         }
     }
 }

@@ -69,5 +69,13 @@ namespace HasK.Data.Storage
         {
             return Storage.GetTypeByName(TypeName);
         }
+
+        /// <summary>
+        /// Delete item from its storage
+        /// </summary>
+        public void DeleteItem()
+        {
+            Storage.DeleteItem(this);
+        }
     }
 }
