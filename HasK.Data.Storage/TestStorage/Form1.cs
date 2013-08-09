@@ -30,10 +30,12 @@ namespace TestStorage
 
             var w2 = storage.CreateItem("Worker", "Other me") as Worker;
 
-			var stream = File.OpenWrite("test2.xml");
+            Stream stream;
+
+			/*var stream = File.OpenWrite("test2.xml");
 			storage.WriteData(stream);
             stream.Flush();
-			stream.Close();
+			stream.Close(); */
 
 			var read = File.OpenRead("test2.xml");
 
@@ -43,6 +45,9 @@ namespace TestStorage
             Console.WriteLine(ww2);
 
             storage.CreateItem("Worker", "new item");
+
+
+            // ww2.Name = "new item";
 
             ww2 = storage.GetItemById(3);
             Console.WriteLine("3: " + ww2);

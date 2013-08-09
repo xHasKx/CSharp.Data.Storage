@@ -12,6 +12,7 @@ namespace HasK.Data.Storage
     /// </summary>
     public class StorageItem
     {
+        private string _name = "";
         /// <summary>
         /// Storage which contains this item
         /// </summary>
@@ -23,7 +24,23 @@ namespace HasK.Data.Storage
         /// <summary>
         /// Name of item
         /// </summary>
-        public string Name { get; set; }
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                if (_name == "")
+                    _name = value;
+                else
+                    if (Storage.TryChangeItemName(this, value))
+                        _name = value;
+                    else
+                        throw new StorageItemExistsException(this);
+            }
+        }
         /// <summary>
         /// Internal type name of item
         /// </summary>
@@ -52,66 +69,5 @@ namespace HasK.Data.Storage
         {
             return Storage.GetTypeByName(TypeName);
         }
-
-		/*
-        public static StorageItem ReadItemFromData(Storage storage, Stream stream, params object[] params_list)
-        {
-            var xml = XmlReader.Create(stream);
-            xml.Read();
-            if (xml.Name != "Item")
-                throw new StorageException(storage, "Can't read Item node from input stream");
-
-            if (!xml.MoveToFirstAttribute())
-                throw new StorageException(storage, "Can't find any attributes in input stream");
-
-            do {
-                Console.WriteLine(xml.Name);
-
-            } while (xml.MoveToNextAttribute());
-
-            return null;
-            /*
-            if (!xml.MoveToAttribute("Type"))
-                throw new StorageException(storage, "Can't find Type attribute in input stream");
-            var item_type = xml.GetAttribute("Type");
-            var type_instance = storage.GetTypeByName(item_type);
-            if (type_instance == null)
-                throw new StorageException(storage, "Wrong item's Type in input stream");
-
-            if (!xml.MoveToAttribute("ID"))
-                throw new StorageException(storage, "Can't find ID attribute in input stream");
-            var item_id_str = xml.GetAttribute("ID");
-            ulong item_id = 0;
-            if (!ulong.TryParse(item_id_str, out item_id))
-                throw new StorageException(storage, "Can't parse ID attribute as ulong in input stream");
-
-            if (!xml.MoveToAttribute("Name"))
-                throw new StorageException(storage, "Can't find Name attribute in input stream");
-            var item_name = xml.GetAttribute("Name");
-
-
-            var params_types = new Type[params_list.Length];
-            for (var i = 0; i < params_list.Length; i++)
-                params_types[i] = params_list[i].GetType();
-            var constructor = type_instance.GetConstructor(params_types);
-            var item = constructor.Invoke(params_list) as StorageItem;
-
-
-
-            item.InitStorageItem(storage, item_type, item_name);
-
-
-
-            var fields = type_instance.GetFields(
-                BindingFlags.Public |
-                BindingFlags.NonPublic |
-                BindingFlags.Instance |
-                BindingFlags.GetField |
-                BindingFlags.GetProperty);
-
-            */
-		/*
-        }
-		*/
     }
 }
