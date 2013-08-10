@@ -26,6 +26,10 @@ namespace HasK.Data.Storage
         /// </summary>
         protected Dictionary<string, Type> _types = new Dictionary<string, Type>();
         /// <summary>
+        /// Dictionary with fields of registered types
+        /// </summary>
+        protected Dictionary<string, List<FieldInfo>> _type_fields = new Dictionary<string, List<FieldInfo>>();
+        /// <summary>
         /// Dictionary with storage items, by IDs
         /// </summary>
         protected Dictionary<ulong, StorageItem> _items_by_id = new Dictionary<ulong, StorageItem>();
@@ -34,13 +38,6 @@ namespace HasK.Data.Storage
         /// </summary>
         protected Dictionary<string, Dictionary<string, StorageItem>> _items_by_type = new Dictionary<string, Dictionary<string, StorageItem>>();
         #endregion
-
-        /// <summary>
-        /// Array of supported types
-        /// </summary>
-        public readonly Type[] SupportedTypes = new Type[] {
-            typeof(Boolean), typeof(String), typeof(Int32), typeof(UInt32), typeof(Int64), typeof(UInt64), typeof(Double)
-        };
 
         /// <summary>
         /// Gets next free id and increment it
@@ -63,6 +60,42 @@ namespace HasK.Data.Storage
             {
                 _types[name] = type;
                 _items_by_type[name] = new Dictionary<string, StorageItem>();
+                var restricted_fields = new string[] { "ID", "Type", "Name" };
+                var fields = new List<FieldInfo>();
+                while (type != typeof(StorageItem))
+                {
+                    foreach (var field in type.GetFields(
+                        BindingFlags.Instance |
+                        BindingFlags.Public |
+                        BindingFlags.NonPublic |
+                        BindingFlags.GetField |
+                        BindingFlags.GetProperty))
+                    {
+                        if (Attribute.IsDefined(field, typeof(StorageItemMemberIgnore)))
+                            continue;
+                        var found = false;
+                        foreach (var f in fields)
+                            if (f.Name == field.Name)
+                            {
+                                found = true;
+                                break;
+                            }
+                        if (!found)
+                            foreach (var n in restricted_fields)
+                                if (n == field.Name)
+                                {
+                                    found = true;
+                                    break;
+                                }
+                        if (!found)
+                            // check if we can parse and serialize this field type
+                            if (field.FieldType.GetMethod("Parse", new Type[] { typeof(String) }) != null &&
+                                field.FieldType.GetMethod("ToString", new Type[0]) != null)
+                                fields.Add(field);
+                    }
+                    type = type.BaseType;
+                }
+                _type_fields[name] = fields;
                 return true;
             }
             return false;
@@ -98,10 +131,6 @@ namespace HasK.Data.Storage
             if (_items_by_type.ContainsKey(type))
                 foreach (var item in _items_by_type[type].Values)
                     yield return item;
-            /*
-            foreach (var item in _items_by_id.Values)
-                if (item.TypeName == type)
-                    yield return item; */
         }
 
         /// <summary>
@@ -121,7 +150,7 @@ namespace HasK.Data.Storage
 
         private StorageItem CreateItemImpl(string type, string name, ulong id)
         {
-            if (GetItemByName(type, name) != null)
+            if (GetItemById(id) != null || GetItemByName(type, name) != null)
                 throw new StorageItemExistsException(null);
             var type_instance = GetTypeByName(type);
             var constructor = type_instance.GetConstructor(new Type[0]);
@@ -252,14 +281,6 @@ namespace HasK.Data.Storage
                 throw new StorageException(this, "Storage node has wrong ItemsCount attribute in input stream");
 
             // now read items
-            var type_fields = new Dictionary<string, FieldInfo[]>();
-            foreach (var pair in _types)
-                type_fields[pair.Key] = pair.Value.GetFields(
-                BindingFlags.Public |
-                BindingFlags.NonPublic |
-                BindingFlags.Instance |
-                BindingFlags.GetField |
-                BindingFlags.GetProperty);
 
             ulong index = 0;
             while (index < _items_count)
@@ -300,7 +321,7 @@ namespace HasK.Data.Storage
                     var item = CreateItemImpl(item_type, item_name, item_id);
 
                     // read other props
-                    foreach (var field in type_fields[item_type])
+                    foreach (var field in _type_fields[item_type])
                     {
                         var name = field.Name;
                         if (name[0] == '<') // ugly but working
@@ -308,75 +329,22 @@ namespace HasK.Data.Storage
                             var end = name.IndexOf('>');
                             name = name.Substring(1, end - 1);
                         }
-                        var supported = false;
-                        foreach (var type in SupportedTypes)
-                            if (field.FieldType == type)
-                            {
-                                supported = true;
-                                break;
-                            }
-                        if (!supported)
-                            throw new StorageItemException(item, "Can't read property of item with ID {0}: unsupported field '{1}' type {2}", item.ID, name, field.FieldType);
-                        if (Attribute.IsDefined(field, typeof(StorageItemMemberIgnore)))
-                            continue;
                         if (!xml.MoveToAttribute(name))
                             throw new StorageException(this, "Can't find attribute '{0}' in storage item with ID {1} in input stream", name, item.ID);
                         var value = xml.GetAttribute(name);
 
-                        var ftp = field.FieldType;
-                        if (ftp == typeof(Boolean))
+                        var parse = field.FieldType.GetMethod("Parse", new Type[] { typeof(String) });
+                        Object parsed_value;
+                        try
                         {
-                            if (value == "True")
-                                    field.SetValue(item, true);
-                                else
-                                    field.SetValue(item, false);
+                            parsed_value = parse.Invoke(null, new object[] { value });
                         }
-                        else if (ftp == typeof(String))
+                        catch (Exception exc)
                         {
-                            if (name.Substring(0, 2) == "x:")
-                                value = Encoding.Unicode.GetString(Convert.FromBase64String(value));
-                            field.SetValue(item, value);
+                            throw new StorageException(this,
+                                "Can't parse field '{0}' in storage item with ID {1} from value '{2}' in input stream: {3}", name, item.ID, value, exc);
                         }
-                        else if (ftp == typeof(Int32))
-                        {
-                            Int32 ready_value;
-                            if (!Int32.TryParse(value, out ready_value))
-                                throw new StorageItemException(item, "Can't parse {0} property '{1}' of item with ID {2}", ftp, name, item.ID);
-                            else
-                                field.SetValue(item, ready_value);
-                        }
-                        else if (ftp == typeof(UInt32))
-                        {
-                            UInt32 ready_value;
-                            if (!UInt32.TryParse(value, out ready_value))
-                                throw new StorageItemException(item, "Can't parse {0} property '{1}' of item with ID {2}", ftp, name, item.ID);
-                            else
-                                field.SetValue(item, ready_value);
-                        }
-                        else if (ftp == typeof(Int64))
-                        {
-                            Int64 ready_value;
-                            if (!Int64.TryParse(value, out ready_value))
-                                throw new StorageItemException(item, "Can't parse {0} property '{1}' of item with ID {2}", ftp, name, item.ID);
-                            else
-                                field.SetValue(item, ready_value);
-                        }
-                        else if (ftp == typeof(UInt64))
-                        {
-                            UInt64 ready_value;
-                            if (!UInt64.TryParse(value, out ready_value))
-                                throw new StorageItemException(item, "Can't parse {0} property '{1}' of item with ID {2}", ftp, name, item.ID);
-                            else
-                                field.SetValue(item, ready_value);
-                        }
-                        else if (ftp == typeof(Double))
-                        {
-                            Double ready_value;
-                            if (!Double.TryParse(value, out ready_value))
-                                throw new StorageItemException(item, "Can't parse {0} property '{1}' of item with ID {2}", ftp, name, item.ID);
-                            else
-                                field.SetValue(item, ready_value);
-                        }
+                        field.SetValue(item, parsed_value);
                     }
                     index += 1;
                 }
@@ -401,15 +369,6 @@ namespace HasK.Data.Storage
             xml.Flush();
             xml.WriteRaw("\n");
 
-            var type_fields = new Dictionary<string, FieldInfo[]>();
-            foreach (var pair in _types)
-                type_fields[pair.Key] = pair.Value.GetFields(
-                BindingFlags.Public |
-                BindingFlags.NonPublic |
-                BindingFlags.Instance |
-                BindingFlags.GetField |
-                BindingFlags.GetProperty);
-
             // write items
             foreach (var pair in _items_by_id)
             {
@@ -418,20 +377,8 @@ namespace HasK.Data.Storage
                 WriteXmlAttr(xml, "Type", item.TypeName);
                 WriteXmlAttr(xml, "ID", item.ID.ToString());
                 WriteXmlAttr(xml, "Name", item.Name);
-                var fields = type_fields[item.TypeName];
-                foreach (var field in fields)
+                foreach (var field in _type_fields[item.TypeName])
                 {
-                    if (Attribute.IsDefined(field, typeof(StorageItemMemberIgnore)))
-                        continue;
-                    var supported = false;
-                    foreach (var type in SupportedTypes)
-                        if (field.FieldType == type)
-                        {
-                            supported = true;
-                            break;
-                        }
-                    if (!supported)
-                        throw new StorageItemException(item, "Can't write item with ID {0}: unsupported field {1} type {2}", item.ID, field.Name, field.FieldType);
                     var name = field.Name;
                     if (name[0] == '<') // ugly but working
                     {

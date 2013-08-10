@@ -114,21 +114,34 @@ namespace TestStorage
                 time_name_lookup.TotalMilliseconds);
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        void DoTests()
         {
             Console.WriteLine("create;enum;id lookup;name lookup");
             var count = 100000;
             DoTest(count);
-            
-            count *= 2; DoTest(count);
-            count *= 2; DoTest(count);
-            count *= 2; DoTest(count);
-            count *= 2; DoTest(count);
-            count *= 2; DoTest(count);
-            count *= 2; DoTest(count);
-            count *= 2; DoTest(count);
 
-            Console.WriteLine("End");
+            count *= 2; DoTest(count);
+            count *= 2; DoTest(count);
+            count *= 2; DoTest(count);
+            count *= 2; DoTest(count);
+            count *= 2; DoTest(count);
+            count *= 2; DoTest(count);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            CreateAndSave("test3.xml");
+            var storage = LoadStorage("test3.xml");
+            foreach (var w in storage.GetItems("Worker"))
+                Console.WriteLine(w);
+
+            var stor2 = new Storage();
+            stor2.RegisterType("SuperWorker", typeof(SuperWorker));
+
+            var sw = stor2.CreateItem("SuperWorker", "sw #1");
+            Console.WriteLine("sw1: " + sw);
+
+            stor2.WriteData(File.OpenWrite("test4.xml"));
         }
     }
 
@@ -152,6 +165,16 @@ namespace TestStorage
         public override string ToString()
         {
             return String.Format("Worker '{0}' of age {1} with ID {2}", Name, PrivAge, ID);
+        }
+    }
+
+    public class SuperWorker : Worker
+    {
+        public int SuperProperty { get; set; }
+
+        public SuperWorker()
+        {
+            SuperProperty = 451;
         }
     }
 

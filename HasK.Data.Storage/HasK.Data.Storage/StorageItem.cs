@@ -12,7 +12,7 @@ namespace HasK.Data.Storage
     /// </summary>
     public class StorageItem
     {
-        private string _name = "";
+        private string _name = String.Empty;
         /// <summary>
         /// Storage which contains this item
         /// </summary>
@@ -32,13 +32,12 @@ namespace HasK.Data.Storage
             }
             set
             {
-                if (_name == "")
+                if (value == String.Empty)
+                    return;
+                if (Storage.TryChangeItemName(this, value))
                     _name = value;
                 else
-                    if (Storage.TryChangeItemName(this, value))
-                        _name = value;
-                    else
-                        throw new StorageItemExistsException(this);
+                    throw new StorageItemExistsException(this);
             }
         }
         /// <summary>
@@ -57,7 +56,7 @@ namespace HasK.Data.Storage
         {
             Storage = storage;
             TypeName = type;
-            Name = name;
+            _name = name;
             ID = id;
         }
 
