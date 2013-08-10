@@ -405,6 +405,7 @@ namespace HasK.Data.Storage
             {
                 _items_by_type[item.TypeName].Remove(item.Name);
                 _items_by_id.Remove(item.ID);
+                _items_count -= 1;
             }
         }
     }

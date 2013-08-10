@@ -141,6 +141,8 @@ namespace TestStorage
             var sw = stor2.CreateItem("SuperWorker", "sw #1");
             Console.WriteLine("sw1: " + sw);
 
+            sw.DeleteItem();
+
             stor2.WriteData(File.OpenWrite("test4.xml"));
         }
     }
