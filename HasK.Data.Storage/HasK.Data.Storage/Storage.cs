@@ -151,7 +151,7 @@ namespace HasK.Data.Storage
         private StorageItem CreateItemImpl(string type, string name, ulong id)
         {
             if (GetItemById(id) != null || GetItemByName(type, name) != null)
-                throw new StorageItemExistsException(null);
+                throw new StorageItemExistsException(this);
             var type_instance = GetTypeByName(type);
             var constructor = type_instance.GetConstructor(new Type[0]);
             var item = constructor.Invoke(new object[0]) as StorageItem;

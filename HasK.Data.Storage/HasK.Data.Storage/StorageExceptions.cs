@@ -51,22 +51,22 @@ namespace HasK.Data.Storage
     /// <summary>
     /// Storage item-related exception which raised when item with given name and type already exists in storage
     /// </summary>
-    public class StorageItemExistsException : StorageItemException
+    public class StorageItemExistsException : StorageException
     {
         /// <summary>
         /// Create storage item exception with specified message
         /// </summary>
-        /// <param name="item">Storage item which throws exception</param>
+        /// <param name="storage">Storage which throws exception</param>
         /// <param name="message">Message of exception</param>
         /// <param name="format_params">Params to format exception message</param>
-        public StorageItemExistsException(StorageItem item, string message, params object[] format_params)
-            : base(item, message, format_params) { }
+        public StorageItemExistsException(Storage storage, string message, params object[] format_params)
+            : base(storage, message, format_params) { }
 
         /// <summary>
         /// Create storage item exception with default message
         /// </summary>
-        /// <param name="item">Storage item which throws exception</param>
-        public StorageItemExistsException(StorageItem item)
-            : base(item, "Item with given name and type already exists in storage") { }
+        /// <param name="storage">Storage which throws exception</param>
+        public StorageItemExistsException(Storage storage)
+            : base(storage, "Item with given name and type already exists in storage") { }
     }
 }

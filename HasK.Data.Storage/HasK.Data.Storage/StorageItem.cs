@@ -37,7 +37,7 @@ namespace HasK.Data.Storage
                 if (Storage.TryChangeItemName(this, value))
                     _name = value;
                 else
-                    throw new StorageItemExistsException(this);
+                    throw new StorageItemExistsException(this.Storage);
             }
         }
         /// <summary>
