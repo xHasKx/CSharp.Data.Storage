@@ -12,7 +12,14 @@ namespace HasK.Data.Storage
     /// </summary>
     public class StorageItem
     {
+        #region Private and internal properties
+        /// <summary>
+        /// Stores name of storage item
+        /// </summary>
         private string _name = String.Empty;
+        #endregion
+
+        #region Public properties
         /// <summary>
         /// Storage which contains this item
         /// </summary>
@@ -44,7 +51,9 @@ namespace HasK.Data.Storage
         /// Internal type name of item
         /// </summary>
         public string TypeName { get; private set; }
+        #endregion
 
+        #region Internal methods
         /// <summary>
         /// Init storage part of item
         /// </summary>
@@ -59,7 +68,9 @@ namespace HasK.Data.Storage
             _name = name;
             ID = id;
         }
+        #endregion
 
+        #region Public methods
         /// <summary>
         /// Get item type instance
         /// </summary>
@@ -76,5 +87,6 @@ namespace HasK.Data.Storage
         {
             Storage.DeleteItem(this);
         }
+        #endregion
     }
 }

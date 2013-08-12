@@ -154,6 +154,24 @@ namespace TestStorage
             PrivAge = 24;
             PubProp = 554;
             PrivProp = "private property";
+            Age2 = 43;
+        }
+
+        [StorageItemMemberIgnore]
+        private int _age2;
+
+        private int Age2
+        {
+            get
+            {
+                Console.WriteLine("Age2::get() => {0}", _age2);
+                return _age2;
+            }
+            set
+            {
+                Console.WriteLine("Age2::set(): {0} => {1}", _age2, value);
+                _age2 = value;
+            }
         }
 
         private int PrivAge;
