@@ -370,13 +370,30 @@ namespace HasK.Data.Storage
         }
 
         /// <summary>
+        /// Read data from string content, all existing items will be cleared
+        /// </summary>
+        /// <param name="content"></param>
+        public void ReadData(string content)
+        {
+            ReadData(XmlReader.Create(new StringReader(content)));
+        }
+
+        /// <summary>
         /// Read data from stream, all existing items will be cleared
         /// </summary>
-        /// <param name="stream">Stream to read data from</param>
+        /// <param name="stream"></param>
         public void ReadData(Stream stream)
         {
+            ReadData(XmlReader.Create(stream));
+        }
+
+        /// <summary>
+        /// Read data from xml reader, all existing items will be cleared
+        /// </summary>
+        /// <param name="xml">Xml reader to read data from</param>
+        public void ReadData(XmlReader xml)
+        {
             ClearItems();
-            var xml = XmlReader.Create(stream);
             xml.Read();
             if (xml.Name != "Storage")
                 throw new StorageException(this, "Can't read Storage node from input stream");
@@ -490,15 +507,35 @@ namespace HasK.Data.Storage
         }
 
         /// <summary>
-        /// Write storage items to stream
+        /// Write storage content to string and return it
+        /// </summary>
+        /// <returns>Returns string with storage data</returns>
+        public string WriteData()
+        {
+            var sb = new StringBuilder();
+            var settings = new XmlWriterSettings();
+            settings.OmitXmlDeclaration = true;
+            WriteData(XmlWriter.Create(sb, settings));
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Write storage content to stream
         /// </summary>
         /// <param name="stream">Stream to write data</param>
         public void WriteData(Stream stream)
         {
             var settings = new XmlWriterSettings();
             settings.OmitXmlDeclaration = true;
-            var xml = XmlWriter.Create(stream, settings);
+            WriteData(XmlWriter.Create(stream, settings));
+        }
 
+        /// <summary>
+        /// Write storage content to xml writer
+        /// </summary>
+        /// <param name="xml">Xml writer to write data</param>
+        public void WriteData(XmlWriter xml)
+        {
             // write storage info
             xml.WriteStartElement("Storage");
             WriteXmlAttr(xml, "LastID", _last_id.ToString());
